@@ -1,5 +1,3 @@
-#![feature(async_await)]
-
 use harbourmaster::{Container, Error, Protocol};
 use std::net::TcpListener;
 
@@ -9,12 +7,14 @@ pub struct CouchDbContainer {
 }
 
 impl CouchDbContainer {
-    pub async fn new() -> Result<Self, Error> {
+    pub async fn new(user: String, pass: String) -> Result<Self, Error> {
         let host_port = get_unused_port()?;
         let container = Container::builder("couchdb")
             .pull_on_build(true)
             .name("couchdb")
             .slug_length(6)
+            .environment_variable(format!("COUCHDB_USER: {}", user))
+            .environment_variable(format!("COUCHDB_PASSWORD: {}", pass))
             .expose(5984, host_port, Protocol::Tcp)
             .build()
             .await?;
